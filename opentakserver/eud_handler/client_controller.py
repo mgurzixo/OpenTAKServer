@@ -524,7 +524,16 @@ class ClientController(Thread):
             return
 
         try:
-            self.rabbit_channel.basic_publish(exchange=exchange, routing_key=routing_key, body=body, properties=properties)
+            # [vroum patch] SelectConnection channel is not thread-safe: publishes from the
+            # socket-reader thread get silently dropped. Use a short-lived BlockingConnection.
+            import pika as _pika
+            _conn = _pika.BlockingConnection(_pika.ConnectionParameters(
+                host=self.app.config.get("OTS_RABBITMQ_SERVER_ADDRESS"),
+                credentials=_pika.PlainCredentials(self.app.config.get("OTS_RABBITMQ_USERNAME"),
+                                                   self.app.config.get("OTS_RABBITMQ_PASSWORD"))))
+            _ch = _conn.channel()
+            _ch.basic_publish(exchange=exchange, routing_key=routing_key, body=body, properties=properties)
+            _conn.close()
         except BaseException as e:
             self.logger.error(f"Failed to publish message, caching and trying again later: {e}")
             self.cached_messages.append({'exchange': exchange, 'routing_key': routing_key, 'body': body, 'properties': properties})
