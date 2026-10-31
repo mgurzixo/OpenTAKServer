@@ -44,6 +44,9 @@ from opentakserver.models.DeviceProfiles import DeviceProfiles
 from opentakserver.models.EUD import EUD
 from opentakserver.models.EUDStats import EUDStats
 from opentakserver.models.GeoChat import GeoChat
+from opentakserver.models.Federate import Federate
+from opentakserver.models.FederationConnection import FederationConnection
+from opentakserver.models.FederationGroups import FederationGroups
 from opentakserver.models.Group import Group
 from opentakserver.models.GroupMission import GroupMission
 from opentakserver.models.Icon import Icon
